@@ -21,12 +21,9 @@ class TestNCFFirestoreService:
     @pytest.fixture
     def service(self, mock_db):
         """Crea instancia del servicio con mock."""
-        with patch('services.ncf_firestore_service.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_db
-            
-            from services.ncf_firestore_service import NCFFirestoreService
-            svc = NCFFirestoreService(db=mock_db)
-            return svc
+        from services.ncf_firestore_service import NCFFirestoreService
+        svc = NCFFirestoreService(db=mock_db)
+        return svc
     
     def test_derive_prefix_from_category(self, service):
         """Test de derivación de prefijo desde categoría."""
@@ -181,26 +178,22 @@ class TestCategoryMapping:
 class TestNCFFormatting:
     """Tests para formateo de NCF."""
     
-    def test_ncf_length_standard(self):
-        """Verifica longitud correcta de NCF estándar."""
+    @pytest.fixture
+    def service(self):
+        """Crea instancia del servicio con mock."""
         from services.ncf_firestore_service import NCFFirestoreService
-        
-        service = NCFFirestoreService.__new__(NCFFirestoreService)
-        service.ncf_padding = 8
-        
+        return NCFFirestoreService(db=Mock())
+    
+    def test_ncf_length_standard(self, service):
+        """Verifica longitud correcta de NCF estándar."""
         ncf = service._format_ncf("B01", 1)
         assert len(ncf) == 11  # 3 + 8
         
         ncf = service._format_ncf("B01", 99999999)
         assert len(ncf) == 11
     
-    def test_ncf_length_ecf(self):
+    def test_ncf_length_ecf(self, service):
         """Verifica longitud correcta de e-CF."""
-        from services.ncf_firestore_service import NCFFirestoreService
-        
-        service = NCFFirestoreService.__new__(NCFFirestoreService)
-        service.ncf_padding = 8
-        
         ncf = service._format_ncf("E31", 1)
         assert len(ncf) == 14  # 3 + 11
         
@@ -212,15 +205,16 @@ class TestCorrector:
     """Tests para el corrector de secuencias."""
     
     @pytest.fixture
-    def service(self):
+    def mock_db(self):
+        """Mock de cliente Firestore."""
+        return Mock()
+    
+    @pytest.fixture
+    def service(self, mock_db):
         """Crea instancia del servicio con mock."""
-        with patch('services.ncf_firestore_service.get_firebase_client') as mock_client:
-            mock_db = Mock()
-            mock_client.return_value.get_firestore.return_value = mock_db
-            
-            from services.ncf_firestore_service import NCFFirestoreService
-            svc = NCFFirestoreService(db=mock_db)
-            return svc
+        from services.ncf_firestore_service import NCFFirestoreService
+        svc = NCFFirestoreService(db=mock_db)
+        return svc
     
     def test_corrector_detects_inconsistency(self, service):
         """Test de detección de inconsistencia."""

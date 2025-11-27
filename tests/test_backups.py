@@ -36,83 +36,73 @@ class TestBackupRunner:
     
     def test_backup_runner_init(self, temp_backup_dir, mock_firestore):
         """Test de inicialización del runner."""
-        with patch('utils.backups.backup_runner.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_firestore
-            
-            from utils.backups.backup_runner import BackupRunner
-            runner = BackupRunner(backup_dir=temp_backup_dir)
-            
-            assert runner.backup_dir == Path(temp_backup_dir)
-            assert len(runner.collections) > 0
+        from utils.backups.backup_runner import BackupRunner
+        runner = BackupRunner(backup_dir=temp_backup_dir)
+        runner.db = mock_firestore  # Override db
+        
+        assert runner.backup_dir == Path(temp_backup_dir)
+        assert len(runner.collections) > 0
     
     def test_backup_creates_directory(self, temp_backup_dir, mock_firestore):
         """Test de que backup crea el directorio."""
-        with patch('utils.backups.backup_runner.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_firestore
-            
-            from utils.backups.backup_runner import BackupRunner
-            runner = BackupRunner(backup_dir=temp_backup_dir)
-            
-            date_str = "2024-11-27"
-            runner.run_backup(date_str)
-            
-            backup_path = Path(temp_backup_dir) / date_str
-            assert backup_path.exists()
+        from utils.backups.backup_runner import BackupRunner
+        runner = BackupRunner(backup_dir=temp_backup_dir)
+        runner.db = mock_firestore  # Override db
+        
+        date_str = "2024-11-27"
+        runner.run_backup(date_str)
+        
+        backup_path = Path(temp_backup_dir) / date_str
+        assert backup_path.exists()
     
     def test_backup_creates_metadata(self, temp_backup_dir, mock_firestore):
         """Test de que backup crea metadata."""
-        with patch('utils.backups.backup_runner.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_firestore
-            
-            from utils.backups.backup_runner import BackupRunner
-            runner = BackupRunner(backup_dir=temp_backup_dir)
-            
-            date_str = "2024-11-27"
-            runner.run_backup(date_str)
-            
-            metadata_path = Path(temp_backup_dir) / date_str / "_metadata.json"
-            assert metadata_path.exists()
-            
-            with open(metadata_path, 'r') as f:
-                metadata = json.load(f)
-                assert 'backup_date' in metadata
-                assert 'backup_time' in metadata
+        from utils.backups.backup_runner import BackupRunner
+        runner = BackupRunner(backup_dir=temp_backup_dir)
+        runner.db = mock_firestore  # Override db
+        
+        date_str = "2024-11-27"
+        runner.run_backup(date_str)
+        
+        metadata_path = Path(temp_backup_dir) / date_str / "_metadata.json"
+        assert metadata_path.exists()
+        
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+            assert 'backup_date' in metadata
+            assert 'backup_time' in metadata
     
     def test_backup_exists_for_date(self, temp_backup_dir, mock_firestore):
         """Test de verificación de backup existente."""
-        with patch('utils.backups.backup_runner.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_firestore
-            
-            from utils.backups.backup_runner import BackupRunner
-            runner = BackupRunner(backup_dir=temp_backup_dir)
-            
-            date_str = "2024-11-27"
-            
-            # No existe aún
-            assert runner.backup_exists_for_date(date_str) is False
-            
-            # Crear backup
-            runner.run_backup(date_str)
-            
-            # Ahora existe
-            assert runner.backup_exists_for_date(date_str) is True
+        from utils.backups.backup_runner import BackupRunner
+        runner = BackupRunner(backup_dir=temp_backup_dir)
+        runner.db = mock_firestore  # Override db
+        
+        date_str = "2024-11-27"
+        
+        # No existe aún
+        assert runner.backup_exists_for_date(date_str) is False
+        
+        # Crear backup
+        runner.run_backup(date_str)
+        
+        # Ahora existe
+        assert runner.backup_exists_for_date(date_str) is True
     
     def test_list_backups(self, temp_backup_dir, mock_firestore):
         """Test de listar backups."""
-        with patch('utils.backups.backup_runner.get_firebase_client') as mock_client:
-            mock_client.return_value.get_firestore.return_value = mock_firestore
-            
-            from utils.backups.backup_runner import BackupRunner
-            runner = BackupRunner(backup_dir=temp_backup_dir)
-            
-            # Crear varios backups
-            runner.run_backup("2024-11-25")
-            runner.run_backup("2024-11-26")
-            runner.run_backup("2024-11-27")
-            
-            backups = runner.list_backups()
-            
-            assert len(backups) == 3
+        from utils.backups.backup_runner import BackupRunner
+        runner = BackupRunner(backup_dir=temp_backup_dir)
+        runner.db = mock_firestore  # Override db
+        
+        # Crear varios backups
+        runner.run_backup("2024-11-25")
+        runner.run_backup("2024-11-26")
+        runner.run_backup("2024-11-27")
+        
+        backups = runner.list_backups()
+        
+        assert len(backups) == 3
 
 
 class TestRetention:

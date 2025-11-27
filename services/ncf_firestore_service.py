@@ -84,7 +84,7 @@ class NCFFirestoreService:
         
         if self.db is None:
             try:
-                from firebase import get_firebase_client
+                from firebase.firebase_client import get_firebase_client
                 client = get_firebase_client()
                 self.db = client.get_firestore()
             except Exception as e:

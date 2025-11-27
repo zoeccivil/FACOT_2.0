@@ -161,6 +161,23 @@ class FirebaseClient:
         
         return None
     
+    def _normalize_storage_bucket(self, bucket: str) -> str:
+        """
+        Normaliza el nombre del bucket para soportar formatos antiguos y nuevos.
+        
+        Firebase cambió de '.appspot.com' a '.firebasestorage.app'.
+        Esta función acepta ambos formatos.
+        """
+        if not bucket:
+            return bucket
+        
+        # Si ya tiene el formato correcto (termina con sufijo esperado), retornar tal cual
+        if bucket.endswith('.firebasestorage.app') or bucket.endswith('.appspot.com'):
+            return bucket
+        
+        # Si solo es el project_id, agregar el sufijo nuevo por defecto
+        return f"{bucket}.firebasestorage.app"
+    
     def _get_storage_bucket(self, cred_path: str) -> str:
         """
         Obtiene el nombre del bucket de Storage.
@@ -169,11 +186,14 @@ class FirebaseClient:
         1. Variable de entorno FIREBASE_STORAGE_BUCKET
         2. Configuración guardada en facot_config
         3. Auto-derivar desde project_id en credenciales
+        
+        Nota: Soporta tanto el formato antiguo (.appspot.com) como el nuevo
+        (.firebasestorage.app) para compatibilidad.
         """
         # 1. Variable de entorno
         env_bucket = os.getenv("FIREBASE_STORAGE_BUCKET")
         if env_bucket:
-            return env_bucket
+            return self._normalize_storage_bucket(env_bucket)
         
         # 2. Configuración guardada
         try:
@@ -181,7 +201,7 @@ class FirebaseClient:
             if hasattr(facot_config, 'get_firebase_config'):
                 _, bucket = facot_config.get_firebase_config()
                 if bucket:
-                    return bucket
+                    return self._normalize_storage_bucket(bucket)
         except Exception:
             pass
         

@@ -84,7 +84,7 @@ def main():
     # Inicializar Firebase (abre diálogo si faltan credenciales)
     try:
         from firebase.firebase_client import ensure_initialized
-        firebase_ready = ensure_initialized(parent_widget=None)
+        firebase_ready = ensure_initialized()
         if firebase_ready:
             print("[MAIN] Firebase inicializado correctamente")
         else:
