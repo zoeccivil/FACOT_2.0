@@ -81,6 +81,28 @@ def main():
     except Exception:
         pass
 
+    # Inicializar Firebase (abre diálogo si faltan credenciales)
+    try:
+        from firebase.firebase_client import ensure_initialized
+        firebase_ready = ensure_initialized(parent_widget=None)
+        if firebase_ready:
+            print("[MAIN] Firebase inicializado correctamente")
+        else:
+            print("[MAIN] Firebase no disponible, usando modo offline")
+    except Exception as e:
+        print(f"[MAIN] Error inicializando Firebase: {e}")
+
+    # Iniciar scheduler de backups (solo si Firebase está disponible)
+    try:
+        from firebase.firebase_client import get_firebase_client
+        client = get_firebase_client()
+        if client.is_available():
+            from utils.backups import start_backup_scheduler
+            start_backup_scheduler()
+            print("[MAIN] Scheduler de backups iniciado")
+    except Exception as e:
+        print(f"[MAIN] Error iniciando scheduler de backups: {e}")
+
     from ui_mainwindow import MainWindow
     w = MainWindow()
     w.show()

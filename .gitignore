@@ -75,3 +75,14 @@ htmlcov/
 .venv
 env/
 venv/
+
+# Firebase credentials (NEVER commit these!)
+firebase-credentials.json
+*-firebase-adminsdk-*.json
+service-account*.json
+
+# Backups directory (local backups)
+backups/
+
+# Local settings (may contain sensitive paths)
+local_settings.json
