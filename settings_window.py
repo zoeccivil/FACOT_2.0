@@ -83,6 +83,25 @@ class SettingsWindow(QDialog):
         layout.addWidget(btn_add_currency)
         layout.addWidget(btn_remove_currency)
 
+        # Sección de Backups y Firebase
+        layout.addWidget(QLabel(""))  # Espaciador
+        layout.addWidget(QLabel("Backups y Firebase:"))
+        
+        hlayout_backups = QHBoxLayout()
+        btn_backup_now = QPushButton("📦 Crear backup ahora")
+        btn_backup_now.clicked.connect(self._create_backup_now)
+        hlayout_backups.addWidget(btn_backup_now)
+        
+        btn_open_backups = QPushButton("📂 Abrir carpeta de backups")
+        btn_open_backups.clicked.connect(self._open_backups_folder)
+        hlayout_backups.addWidget(btn_open_backups)
+        
+        btn_firebase_config = QPushButton("🔥 Configurar Firebase")
+        btn_firebase_config.clicked.connect(self._configure_firebase)
+        hlayout_backups.addWidget(btn_firebase_config)
+        
+        layout.addLayout(hlayout_backups)
+
         # Botones de acción
         btn_save = QPushButton("Guardar configuración")
         btn_save.clicked.connect(self._save_settings)
@@ -181,3 +200,79 @@ class SettingsWindow(QDialog):
         facot_config.set_empresa_activa(company_id)
         QMessageBox.information(self, "Configuración", "Configuración guardada correctamente.")
         self.accept()
+
+    def _create_backup_now(self):
+        """Crea un backup manual ahora."""
+        try:
+            from utils.backups import create_backup
+            result = create_backup()
+            
+            if result['success']:
+                QMessageBox.information(
+                    self,
+                    "Backup completado",
+                    f"Backup creado exitosamente.\n\n"
+                    f"Ubicación: {result.get('backup_path', 'N/A')}\n"
+                    f"Colecciones: {len(result.get('collections', {}))}"
+                )
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Backup con errores",
+                    f"El backup se completó con algunos errores:\n\n"
+                    f"{', '.join(result.get('errors', ['Error desconocido']))}"
+                )
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error de backup",
+                f"No se pudo crear el backup:\n\n{str(e)}"
+            )
+
+    def _open_backups_folder(self):
+        """Abre la carpeta de backups en el explorador de archivos."""
+        import os
+        import subprocess
+        import platform
+        
+        backup_dir = facot_config.get_backup_config().get('backup_dir', './backups')
+        backup_path = os.path.abspath(backup_dir)
+        
+        # Crear la carpeta si no existe
+        os.makedirs(backup_path, exist_ok=True)
+        
+        try:
+            if platform.system() == 'Windows':
+                os.startfile(backup_path)
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.run(['open', backup_path])
+            else:  # Linux
+                subprocess.run(['xdg-open', backup_path])
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Error",
+                f"No se pudo abrir la carpeta:\n{backup_path}\n\nError: {str(e)}"
+            )
+
+    def _configure_firebase(self):
+        """Abre el diálogo de configuración de Firebase."""
+        try:
+            from dialogs.firebase_config_dialog import FirebaseConfigDialog
+            
+            dialog = FirebaseConfigDialog(self)
+            result = dialog.exec()
+            
+            if result == 1:  # Accepted
+                QMessageBox.information(
+                    self,
+                    "Firebase configurado",
+                    "La configuración de Firebase se ha guardado.\n"
+                    "Los cambios tomarán efecto la próxima vez que inicie la aplicación."
+                )
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"No se pudo abrir la configuración de Firebase:\n\n{str(e)}"
+            )

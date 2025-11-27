@@ -151,3 +151,73 @@ def set_downloads_folder_path(path):
     config["downloads_folder_path"] = path
     set_empresa_config(empresa_id, empresa_cfg)
     save_config(config)
+
+
+# --- CONFIGURACIÓN DE FIREBASE ---
+
+def get_firebase_config():
+    """
+    Obtiene la configuración de Firebase.
+    
+    Returns:
+        Tuple[str, str]: (credentials_path, storage_bucket)
+    """
+    config = load_config()
+    firebase_cfg = config.get("firebase", {})
+    return (
+        firebase_cfg.get("credentials_path", ""),
+        firebase_cfg.get("storage_bucket", "")
+    )
+
+def set_firebase_config(credentials_path: str, storage_bucket: str):
+    """
+    Guarda la configuración de Firebase.
+    
+    Args:
+        credentials_path: Ruta al archivo JSON de credenciales
+        storage_bucket: Nombre del bucket de storage (ej: project-id.firebasestorage.app)
+    """
+    config = load_config()
+    if "firebase" not in config:
+        config["firebase"] = {}
+    config["firebase"]["credentials_path"] = credentials_path
+    config["firebase"]["storage_bucket"] = storage_bucket
+    save_config(config)
+
+
+# --- CONFIGURACIÓN DE BACKUPS ---
+
+def get_backup_config():
+    """
+    Obtiene la configuración de backups.
+    
+    Returns:
+        Dict con claves: backup_dir, backup_hour, retention_days
+    """
+    config = load_config()
+    backup_cfg = config.get("backups", {})
+    return {
+        "backup_dir": backup_cfg.get("backup_dir", "./backups"),
+        "backup_hour": backup_cfg.get("backup_hour", "02:00"),
+        "retention_days": backup_cfg.get("retention_days", 30)
+    }
+
+def set_backup_config(backup_dir: str = None, backup_hour: str = None, retention_days: int = None):
+    """
+    Guarda la configuración de backups.
+    
+    Args:
+        backup_dir: Directorio de backups
+        backup_hour: Hora de ejecución (formato HH:MM)
+        retention_days: Días de retención
+    """
+    config = load_config()
+    if "backups" not in config:
+        config["backups"] = {}
+    if backup_dir is not None:
+        config["backups"]["backup_dir"] = backup_dir
+    if backup_hour is not None:
+        config["backups"]["backup_hour"] = backup_hour
+    if retention_days is not None:
+        config["backups"]["retention_days"] = retention_days
+    save_config(config)

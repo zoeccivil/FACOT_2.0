@@ -1,6 +1,6 @@
 # FACOT - Sistema de Gestión de Facturas y Cotizaciones
 
-![Versión](https://img.shields.io/badge/versión-2.1-blue.svg)
+![Versión](https://img.shields.io/badge/versión-2.2-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-orange.svg)
 ![Tests](https://img.shields.io/badge/tests-79%20passing-brightgreen.svg)
@@ -8,6 +8,28 @@
 ## 📋 Descripción
 
 FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado para empresas en República Dominicana. El sistema ofrece una solución robusta para la administración de documentos fiscales, cumpliendo con las normativas de la DGII (Dirección General de Impuestos Internos).
+
+### 🆕 Novedades v2.2 - Firestore-First
+
+✨ **Runtime 100% Firestore**
+- Todo el runtime usa Firestore (Firebase) exclusivamente
+- SQLite solo para migraciones existentes y backups locales
+- Sin uso de Realtime Database
+
+✨ **NCF Transaccional con Firestore**
+- Transacciones Firestore con reintentos automáticos
+- NCFs únicos garantizados bajo concurrencia
+- Corrector de secuencias automático
+
+✨ **Backups Automáticos Diarios**
+- Exportación diaria de colecciones a JSON local
+- Retención configurable (30 días por defecto)
+- Botones en UI para backup manual
+
+✨ **Diálogo de Configuración Firebase**
+- Configuración guiada al primer inicio
+- Autocompletado de bucket desde credenciales
+- Validación de credenciales antes de guardar
 
 ### 🆕 Novedades v2.1
 
@@ -17,7 +39,7 @@ FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado pa
 - Trazabilidad total de NCF asignados
 
 ✨ **NCF Sin Duplicados**
-- Transacciones BEGIN EXCLUSIVE (SQLite)
+- Transacciones Firestore (v2.2) / BEGIN EXCLUSIVE SQLite (v2.1)
 - Validado con tests de concurrencia
 - Imposible generar NCF duplicados
 
@@ -41,7 +63,7 @@ FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado pa
 - Soporte para múltiples monedas (RD$, USD, EUR)
 - Cálculo automático de ITBIS (18%)
 - Conversión automática a pesos dominicanos
-- **🆕 NCF automático al crear facturas**
+- **🆕 NCF automático con transacciones Firestore**
 - **🆕 Auditoría automática de cambios**
 
 ✅ **Gestión de Cotizaciones**
@@ -55,14 +77,13 @@ FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado pa
 - B04 - Nota de Crédito
 - B14 - Régimen Especial
 - B15 - Gubernamental
-- **🆕 Numeración segura sin duplicados (BEGIN EXCLUSIVE)**
-- **🆕 Tabla de secuencias persistente**
+- **🆕 Secuencias almacenadas en Firestore (ncf_sequence_configs)**
+- **🆕 Corrector automático de inconsistencias**
 
-✅ **Arquitectura Dual: SQLite + Firebase**
-- **SQLite Local**: Para trabajo offline
-- **Firebase Cloud**: Para sincronización y trabajo multi-usuario
-- Cambio automático entre modos
-- Migración de datos facilitada
+✅ **Arquitectura Firebase-First (v2.2)**
+- **Firestore**: Base de datos principal para runtime
+- **SQLite**: Solo para migraciones y backups locales
+- **Backups automáticos**: JSON diarios con retención 30 días
 
 ✅ **Reportes y Análisis**
 - Reportes mensuales en PDF y Excel
@@ -90,13 +111,14 @@ FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado pa
 - Python 3.8 o superior
 - pip (gestor de paquetes de Python)
 - Sistema operativo: Windows, Linux o macOS
+- Cuenta de Firebase (para Firestore)
 
 ### Instalación
 
 1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/zoeccivil/FACOT_GIT.git
-cd FACOT_GIT
+git clone https://github.com/zoeccivil/FACOT_2.0.git
+cd FACOT_2.0
 ```
 
 2. **Crear entorno virtual (recomendado)**
@@ -115,15 +137,31 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Migrar base de datos (NUEVO - v2.1)**
-```bash
-python scripts/migrate_db.py facturas_cotizaciones.db
-```
+4. **Configurar Firebase**
+
+   Al iniciar la aplicación por primera vez, aparecerá un diálogo para configurar Firebase:
+   
+   - Selecciona el archivo JSON de credenciales (Service Account)
+   - El bucket de storage se autocompleta
+   - Click en "Guardar y conectar"
+   
+   Alternativamente, configura variables de entorno (ver `.env.example`):
+   ```bash
+   cp .env.example .env
+   # Editar .env con tus valores
+   ```
 
 5. **Ejecutar la aplicación**
 ```bash
 python main.py
 ```
+
+### Configuración de Firebase
+
+Ver [FIREBASE_SETUP.md](FIREBASE_SETUP.md) para instrucciones detalladas sobre:
+- Crear proyecto Firebase
+- Obtener credenciales
+- Configurar Firestore y Storage
 
 ### 🚀 Inicio Rápido - Demo del Backend
 
@@ -144,7 +182,15 @@ python demo_backend.py
 
 ## 📚 Documentación
 
-### Documentación Técnica Nueva (v2.1)
+### Documentación Nueva (v2.2)
+
+- **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)** - Configuración completa de Firebase
+- **[NCF_SEQUENCE.md](NCF_SEQUENCE.md)** - Sistema de secuencias NCF con Firestore
+- **[BACKUPS.md](BACKUPS.md)** - Sistema de backups automáticos
+- **[CONFIG_DIALOG.md](CONFIG_DIALOG.md)** - Diálogo de configuración de Firebase
+- **[.env.example](.env.example)** - Variables de entorno disponibles
+
+### Documentación Técnica (v2.1)
 
 - **[Implementación Backend Completa](IMPLEMENTACION_BACKEND_COMPLETA.md)** - Resumen técnico completo
 - **[Guía de Integración Completa](GUIA_INTEGRACION_COMPLETA.md)** - Paso a paso para desarrolladores
@@ -158,12 +204,6 @@ python demo_backend.py
 - **[PR6: Migración a Firebase](README_PR6.md)** - Arquitectura cloud y sincronización
 - **[Sistema NCF](README_SISTEMA_NCF.md)** - Comprobantes fiscales dominicanos
 - **[Indicador de Conexión](INDICADOR_CONEXION.md)** - Barra de estado visual
-
-### Documentación Técnica
-
-- **[Implementación Completa PR1](IMPLEMENTACION_COMPLETA.md)** - Detalles técnicos PR1
-- **[Resumen PR6](PR6_RESUMEN_COMPLETO.md)** - Detalles técnicos Firebase
-- **[Resumen Completo](RESUMEN_COMPLETO_PR1_PR6_INDICADOR_PR2.md)** - Todas las fases
 
 ### Guías de Solución de Problemas
 
