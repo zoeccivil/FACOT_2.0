@@ -81,8 +81,8 @@ firebase-credentials.json
 *-firebase-adminsdk-*.json
 service-account*.json
 
-# Backups directory (local backups)
-backups/
+# Backups directory (local backups data, not source code)
+/backups/
 
 # Local settings (may contain sensitive paths)
 local_settings.json
