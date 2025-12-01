@@ -644,9 +644,10 @@ class FirebaseDataAccess(DataAccess):
             print("[FIREBASE] Storage no disponible")
             return None
         
+        # Constante para cache expiration (24 horas en segundos)
+        CACHE_EXPIRATION_SECONDS = 24 * 60 * 60  # 86400
+        
         try:
-            import os
-            
             # Crear directorio de cache si no existe
             cache_dir = os.path.join(".", "data", "cache", "logos")
             os.makedirs(cache_dir, exist_ok=True)
@@ -663,7 +664,7 @@ class FirebaseDataAccess(DataAccess):
             if os.path.exists(local_path):
                 # Verificar antigüedad (re-descargar si tiene más de 24 horas)
                 import time
-                if time.time() - os.path.getmtime(local_path) < 86400:  # 24 horas
+                if time.time() - os.path.getmtime(local_path) < CACHE_EXPIRATION_SECONDS:
                     return local_path
             
             # Descargar desde Storage

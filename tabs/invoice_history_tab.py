@@ -11,9 +11,8 @@ from PyQt6.QtCore import Qt
 
 from constants import ITBIS_RATE
 
-# Tipos de facturas que se consideran "ingresos" (ventas)
-# Ajustar según el dominio real del sistema
-INGRESO_TYPES: Set[str] = {
+# Tipos de categoría/tipo de factura que se consideran "ingresos" (ventas)
+INVOICE_TYPE_INGRESOS: Set[str] = {
     "INGRESO", 
     "FACTURA", 
     "FACTURA PRIVADA",
@@ -24,9 +23,19 @@ INGRESO_TYPES: Set[str] = {
     "GUBERNAMENTAL",
     "REGIMEN ESPECIAL",
     "EXPORTACION",
-    # Tipos NCF de ingresos (B01, B02, B14, B15, B16)
-    "B01", "B02", "B14", "B15", "B16",
 }
+
+# Prefijos NCF que corresponden a comprobantes de venta/ingreso
+NCF_PREFIX_INGRESOS: Set[str] = {
+    "B01",  # Crédito Fiscal
+    "B02",  # Consumidor Final  
+    "B14",  # Régimen Especial
+    "B15",  # Gubernamental
+    "B16",  # Exportación
+}
+
+# Conjunto combinado para filtrado
+INGRESO_TYPES: Set[str] = INVOICE_TYPE_INGRESOS | NCF_PREFIX_INGRESOS
 
 try:
     from dialogs.invoice_preview_dialog import InvoicePreviewDialog

@@ -279,6 +279,8 @@ class MainWindow(QMainWindow):
             for theme_id, theme_name in themes.items():
                 action = QAction(theme_name, self)
                 action.setCheckable(True)
+                # Store theme_id as data for reliable matching
+                action.setData(theme_id)
                 
                 # Marcar el tema actual
                 try:
@@ -323,11 +325,10 @@ class MainWindow(QMainWindow):
         for menu in self.menuBar().findChildren(QMenu):
             if "Apariencias" in menu.title():
                 for action in menu.actions():
-                    # El texto de la acción es el nombre del tema
-                    action.setChecked(
-                        action.text().lower().replace(" ", "_") == current_theme or
-                        action.text() == current_theme
-                    )
+                    # Use stored data for reliable matching
+                    action_theme_id = action.data()
+                    if action_theme_id:
+                        action.setChecked(action_theme_id == current_theme)
     
     def _abrir_configuracion_firebase(self):
         """Abre el diálogo de configuración de Firebase."""
