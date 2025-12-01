@@ -126,6 +126,28 @@ class FirebaseDataAccess(DataAccess):
     
     # ===== ÍTEMS =====
     
+    def get_all_items(self) -> List[Dict[str, Any]]:
+        """
+        Obtiene todos los ítems de Firestore.
+        
+        Returns:
+            Lista de ítems con todos sus campos
+        """
+        try:
+            items_ref = self.db.collection('items')
+            docs = items_ref.stream()
+            
+            items = []
+            for doc in docs:
+                item_data = doc.to_dict()
+                item_data['id'] = doc.id
+                items.append(item_data)
+            
+            return items
+        except Exception as e:
+            print(f"[FIREBASE] Error getting all items: {e}")
+            return []
+    
     def get_items_like(self, query: str, limit: int = 20) -> List[Dict[str, Any]]:
         """Busca ítems por código o nombre."""
         try:

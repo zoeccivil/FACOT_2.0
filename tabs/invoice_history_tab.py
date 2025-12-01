@@ -151,21 +151,40 @@ class InvoiceHistoryTab(QWidget):
             self._add_invoice_action_buttons(row, f)
 
     def _add_invoice_action_buttons(self, row: int, record: Dict[str, Any]):
+        """
+        Añade un único botón de Vista Previa con estilo claro y legible.
+        """
         widget = QWidgetAlias()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        btn_preview = QPushButton("Vista Previa")
-        btn_pdf = QPushButton("PDF")
-        btn_excel = QPushButton("Excel")
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(0)
+        
+        # Único botón de Vista Previa con estilo claro
+        btn_preview = QPushButton("👁 Ver")
+        btn_preview.setObjectName("previewButton")
+        btn_preview.setStyleSheet("""
+            QPushButton#previewButton {
+                background-color: #2196f3;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-weight: bold;
+                min-width: 60px;
+            }
+            QPushButton#previewButton:hover {
+                background-color: #1976d2;
+            }
+            QPushButton#previewButton:pressed {
+                background-color: #0d47a1;
+            }
+        """)
+        btn_preview.setToolTip("Vista previa de la factura")
         layout.addWidget(btn_preview)
-        layout.addWidget(btn_pdf)
-        layout.addWidget(btn_excel)
         widget.setLayout(layout)
 
-        # Connect handlers capturing the record
+        # Connect handler
         btn_preview.clicked.connect(lambda _, rec=record: self._open_invoice_preview(rec))
-        btn_pdf.clicked.connect(lambda _, rec=record: self._export_invoice_pdf(rec))
-        btn_excel.clicked.connect(lambda _, rec=record: self._export_invoice_excel(rec))
 
         self.table.setCellWidget(row, 7, widget)
 
