@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Set
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QPushButton, QTableWidget, QTableWidgetItem,
@@ -10,6 +10,23 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from constants import ITBIS_RATE
+
+# Tipos de facturas que se consideran "ingresos" (ventas)
+# Ajustar según el dominio real del sistema
+INGRESO_TYPES: Set[str] = {
+    "INGRESO", 
+    "FACTURA", 
+    "FACTURA PRIVADA",
+    "EMITIDA",
+    "VENTA",
+    "CREDITO FISCAL",
+    "CONSUMIDOR FINAL",
+    "GUBERNAMENTAL",
+    "REGIMEN ESPECIAL",
+    "EXPORTACION",
+    # Tipos NCF de ingresos (B01, B02, B14, B15, B16)
+    "B01", "B02", "B14", "B15", "B16",
+}
 
 try:
     from dialogs.invoice_preview_dialog import InvoicePreviewDialog
@@ -63,11 +80,52 @@ class InvoiceHistoryTab(QWidget):
         btn_refresh.clicked.connect(self.refresh)
         layout.addWidget(btn_refresh)
 
+    def _filter_ingreso_invoices(self, facturas: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Filtra facturas para mostrar solo las de tipo ingreso (ventas).
+        
+        Los tipos de ingreso incluyen: INGRESO, FACTURA, FACTURA PRIVADA, EMITIDA, VENTA,
+        y los prefijos NCF de ventas (B01, B02, B14, B15, B16).
+        
+        Args:
+            facturas: Lista de facturas a filtrar
+        
+        Returns:
+            Lista de facturas filtradas (solo ingresos)
+        """
+        filtered = []
+        for inv in facturas:
+            # Obtener tipo de factura de varios campos posibles
+            invoice_type = (
+                inv.get('type') or 
+                inv.get('invoice_type') or 
+                inv.get('category') or 
+                inv.get('invoice_category') or
+                ''
+            ).upper().strip()
+            
+            # También verificar el prefijo del NCF
+            ncf = (inv.get('invoice_number') or inv.get('ncf') or '').upper()
+            ncf_prefix = ncf[:3] if len(ncf) >= 3 else ''
+            
+            # Si el tipo o el prefijo están en la lista de ingresos, incluir
+            if invoice_type in INGRESO_TYPES or ncf_prefix in INGRESO_TYPES:
+                filtered.append(inv)
+            # Si no hay tipo definido pero hay NCF, incluir (fallback conservador)
+            elif not invoice_type and ncf:
+                filtered.append(inv)
+        
+        return filtered
+
     def refresh(self):
         company = self.get_current_company()
         if not company:
             return
         facturas = self.logic.get_facturas(company['id']) if hasattr(self.logic, "get_facturas") else []
+        
+        # Filtrar solo facturas de tipo ingreso
+        facturas = self._filter_ingreso_invoices(facturas)
+        
         self.table.setRowCount(0)
         for f in facturas:
             row = self.table.rowCount()

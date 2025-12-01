@@ -6,6 +6,7 @@ con soporte para multi-usuario y company_id scoping.
 """
 
 from __future__ import annotations
+import os
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -560,3 +561,205 @@ class FirebaseDataAccess(DataAccess):
     def close(self) -> None:
         """No-op para Firestore (no necesita cierre explícito)."""
         pass
+    
+    # ===== LOGOS EN STORAGE =====
+    
+    def upload_logo_to_storage(self, local_path: str, template_id: str) -> Optional[str]:
+        """
+        Sube un logo de plantilla a Firebase Storage.
+        
+        Args:
+            local_path: Ruta local del archivo de imagen
+            template_id: ID de la plantilla
+        
+        Returns:
+            URL pública del archivo o None si falla
+        """
+        if not self.storage:
+            print("[FIREBASE] Storage no disponible")
+            return None
+        
+        if not os.path.exists(local_path):
+            print(f"[FIREBASE] Archivo no existe: {local_path}")
+            return None
+        
+        try:
+            import os
+            
+            # Determinar extensión
+            _, ext = os.path.splitext(local_path)
+            if not ext:
+                ext = ".png"
+            
+            # Ruta en Storage
+            storage_path = f"templates/{template_id}/logo{ext}"
+            
+            # Obtener blob
+            blob = self.storage.blob(storage_path)
+            
+            # Determinar content type
+            content_types = {
+                ".png": "image/png",
+                ".jpg": "image/jpeg",
+                ".jpeg": "image/jpeg",
+                ".gif": "image/gif",
+                ".webp": "image/webp"
+            }
+            content_type = content_types.get(ext.lower(), "application/octet-stream")
+            
+            # Subir archivo
+            blob.upload_from_filename(local_path, content_type=content_type)
+            
+            # Hacer público (opcional)
+            try:
+                blob.make_public()
+                public_url = blob.public_url
+            except Exception:
+                # Si no se puede hacer público, usar URL de descarga
+                public_url = blob.generate_signed_url(
+                    version="v4",
+                    expiration=3600 * 24 * 365,  # 1 año
+                    method="GET"
+                )
+            
+            print(f"[FIREBASE] Logo subido: {storage_path}")
+            return public_url
+            
+        except Exception as e:
+            print(f"[FIREBASE] Error subiendo logo: {e}")
+            return None
+    
+    def download_logo(self, storage_path: str, template_id: str) -> Optional[str]:
+        """
+        Descarga un logo desde Storage a cache local.
+        
+        Args:
+            storage_path: Ruta en Storage (ej: templates/{id}/logo.png)
+            template_id: ID de la plantilla
+        
+        Returns:
+            Ruta del archivo en cache local o None si falla
+        """
+        if not self.storage:
+            print("[FIREBASE] Storage no disponible")
+            return None
+        
+        try:
+            import os
+            
+            # Crear directorio de cache si no existe
+            cache_dir = os.path.join(".", "data", "cache", "logos")
+            os.makedirs(cache_dir, exist_ok=True)
+            
+            # Determinar extensión del archivo
+            _, ext = os.path.splitext(storage_path)
+            if not ext:
+                ext = ".png"
+            
+            # Ruta local de cache
+            local_path = os.path.join(cache_dir, f"{template_id}{ext}")
+            
+            # Verificar si ya existe en cache (evitar descargas repetidas)
+            if os.path.exists(local_path):
+                # Verificar antigüedad (re-descargar si tiene más de 24 horas)
+                import time
+                if time.time() - os.path.getmtime(local_path) < 86400:  # 24 horas
+                    return local_path
+            
+            # Descargar desde Storage
+            blob = self.storage.blob(storage_path)
+            
+            if not blob.exists():
+                print(f"[FIREBASE] Logo no existe en Storage: {storage_path}")
+                return None
+            
+            blob.download_to_filename(local_path)
+            print(f"[FIREBASE] Logo descargado: {local_path}")
+            
+            return local_path
+            
+        except Exception as e:
+            print(f"[FIREBASE] Error descargando logo: {e}")
+            return None
+    
+    def update_template_logo(self, template_id: str, local_logo_path: str) -> Dict[str, Any]:
+        """
+        Sube un logo y actualiza el documento de plantilla.
+        
+        Args:
+            template_id: ID de la plantilla
+            local_logo_path: Ruta local del logo
+        
+        Returns:
+            Dict con logo_storage_path y logo_url, o vacío si falla
+        """
+        result = {}
+        
+        # Subir logo
+        public_url = self.upload_logo_to_storage(local_logo_path, template_id)
+        
+        if public_url:
+            import os
+            _, ext = os.path.splitext(local_logo_path)
+            storage_path = f"templates/{template_id}/logo{ext}"
+            
+            result = {
+                "logo_storage_path": storage_path,
+                "logo_url": public_url
+            }
+            
+            # Actualizar documento de plantilla
+            try:
+                template_ref = self.db.collection('templates').document(str(template_id))
+                template_ref.update({
+                    "logo_storage_path": storage_path,
+                    "logo_url": public_url,
+                    "updated_at": datetime.utcnow().isoformat(),
+                    "updated_by": self.user_id
+                })
+            except Exception as e:
+                print(f"[FIREBASE] Error actualizando plantilla: {e}")
+        
+        return result
+    
+    def get_template_logo(self, template_id: str, fallback_local_path: Optional[str] = None) -> Optional[str]:
+        """
+        Obtiene el logo de una plantilla desde cache/Storage con fallback local.
+        
+        Args:
+            template_id: ID de la plantilla
+            fallback_local_path: Ruta local alternativa si falla la descarga
+        
+        Returns:
+            Ruta del logo (cache, descargado o fallback) o None
+        """
+        try:
+            # Buscar info de plantilla
+            template_ref = self.db.collection('templates').document(str(template_id))
+            doc = template_ref.get()
+            
+            if doc.exists:
+                template_data = doc.to_dict()
+                storage_path = template_data.get('logo_storage_path')
+                
+                if storage_path:
+                    # Intentar descargar
+                    local_path = self.download_logo(storage_path, template_id)
+                    if local_path:
+                        return local_path
+            
+            # Fallback a ruta local
+            if fallback_local_path and os.path.exists(fallback_local_path):
+                print(f"[FIREBASE] Usando logo local como fallback: {fallback_local_path}")
+                return fallback_local_path
+            
+            return None
+            
+        except Exception as e:
+            print(f"[FIREBASE] Error obteniendo logo de plantilla: {e}")
+            
+            # Fallback
+            if fallback_local_path and os.path.exists(fallback_local_path):
+                return fallback_local_path
+            
+            return None

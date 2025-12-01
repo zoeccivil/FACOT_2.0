@@ -221,3 +221,28 @@ def set_backup_config(backup_dir: str = None, backup_hour: str = None, retention
     if retention_days is not None:
         config["backups"]["retention_days"] = retention_days
     save_config(config)
+
+
+# --- CONFIGURACIÓN DE TEMA ---
+
+def get_theme() -> str:
+    """
+    Obtiene el tema actual configurado.
+    
+    Returns:
+        Nombre del tema (ej: 'light', 'dark', 'midnight', 'coral', 'high_contrast')
+        Por defecto: 'light'
+    """
+    config = load_config()
+    return config.get("theme", "light")
+
+def set_theme(theme: str):
+    """
+    Guarda el tema seleccionado.
+    
+    Args:
+        theme: Nombre del tema a guardar
+    """
+    config = load_config()
+    config["theme"] = theme
+    save_config(config)

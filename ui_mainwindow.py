@@ -215,11 +215,11 @@ class MainWindow(QMainWindow):
 
         # Menú Reportes (placeholders)
         reportes_menu = QMenu("&Reportes", self); menu_bar.addMenu(reportes_menu)
-        reporte_ventas_action = QAction("Reporte de Ventas", self)
-        reporte_ventas_action.triggered.connect(lambda: QMessageBox.information(self, "Reporte", "Aquí se abriría el reporte de ventas."))
+        reporte_ventas_action = QAction("📊 Reporte de Ventas", self)
+        reporte_ventas_action.triggered.connect(self._abrir_reporte_ventas)
         reportes_menu.addAction(reporte_ventas_action)
-        reporte_clientes_action = QAction("Reporte por Cliente", self)
-        reporte_clientes_action.triggered.connect(lambda: QMessageBox.information(self, "Reporte", "Aquí se abriría el reporte por cliente."))
+        reporte_clientes_action = QAction("👥 Reporte por Cliente", self)
+        reporte_clientes_action.triggered.connect(self._abrir_reporte_clientes)
         reportes_menu.addAction(reporte_clientes_action)
 
         # Menú Herramientas
@@ -235,6 +235,18 @@ class MainWindow(QMainWindow):
         ncf_config_action.setToolTip("Configurar secuencias de NCF por empresa y tipo de comprobante")
         ncf_config_action.triggered.connect(self._abrir_configuracion_ncf)
         herramientas_menu.addAction(ncf_config_action)
+        
+        herramientas_menu.addSeparator()
+        
+        firebase_config_action = QAction("🔥 Configurar Firebase...", self)
+        firebase_config_action.setShortcut("Ctrl+Shift+F")
+        firebase_config_action.setToolTip("Configurar credenciales de Firebase")
+        firebase_config_action.triggered.connect(self._abrir_configuracion_firebase)
+        herramientas_menu.addAction(firebase_config_action)
+
+        # Menú Apariencias (Themes)
+        apariencias_menu = QMenu("🎨 &Apariencias", self); menu_bar.addMenu(apariencias_menu)
+        self._setup_theme_menu(apariencias_menu)
 
         # Menú Opciones
         opciones_menu = QMenu("&Opciones", self); menu_bar.addMenu(opciones_menu)
@@ -255,6 +267,116 @@ class MainWindow(QMainWindow):
         action_edit_template.setStatusTip("Editar plantilla para la empresa seleccionada")
         action_edit_template.triggered.connect(self._menu_edit_template)
         opciones_menu.addAction(action_edit_template)
+    
+    def _setup_theme_menu(self, menu: QMenu):
+        """Configura el menú de temas/apariencias."""
+        try:
+            from utils.theme_manager import get_available_themes, get_theme_manager
+            
+            themes = get_available_themes()
+            theme_manager = get_theme_manager()
+            
+            for theme_id, theme_name in themes.items():
+                action = QAction(theme_name, self)
+                action.setCheckable(True)
+                
+                # Marcar el tema actual
+                try:
+                    current = facot_config.get_theme()
+                    action.setChecked(theme_id == current)
+                except Exception:
+                    action.setChecked(theme_id == "light")
+                
+                # Conectar acción
+                action.triggered.connect(
+                    lambda checked, t=theme_id: self._apply_theme(t)
+                )
+                menu.addAction(action)
+        except ImportError as e:
+            print(f"[THEME] Error configurando menú de temas: {e}")
+            placeholder = QAction("(Temas no disponibles)", self)
+            placeholder.setEnabled(False)
+            menu.addAction(placeholder)
+    
+    def _apply_theme(self, theme_id: str):
+        """Aplica un tema y lo guarda en la configuración."""
+        try:
+            from utils.theme_manager import get_theme_manager
+            from PyQt6.QtWidgets import QApplication
+            
+            theme_manager = get_theme_manager()
+            theme_manager.set_app(QApplication.instance())
+            
+            if theme_manager.save_and_apply_theme(theme_id):
+                # Actualizar checkmarks en el menú
+                self._update_theme_menu_checks(theme_id)
+                QMessageBox.information(
+                    self,
+                    "Tema aplicado",
+                    f"El tema '{theme_id}' se ha aplicado correctamente."
+                )
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"No se pudo aplicar el tema: {e}")
+    
+    def _update_theme_menu_checks(self, current_theme: str):
+        """Actualiza los checkmarks del menú de temas."""
+        for menu in self.menuBar().findChildren(QMenu):
+            if "Apariencias" in menu.title():
+                for action in menu.actions():
+                    # El texto de la acción es el nombre del tema
+                    action.setChecked(
+                        action.text().lower().replace(" ", "_") == current_theme or
+                        action.text() == current_theme
+                    )
+    
+    def _abrir_configuracion_firebase(self):
+        """Abre el diálogo de configuración de Firebase."""
+        try:
+            from dialogs.firebase_config_dialog import FirebaseConfigDialog
+            
+            dialog = FirebaseConfigDialog(self)
+            if dialog.exec():
+                # Configuración guardada, intentar re-inicializar
+                QMessageBox.information(
+                    self,
+                    "Firebase Configurado",
+                    "La configuración de Firebase se ha guardado.\n\n"
+                    "Por favor, reinicie la aplicación para aplicar los cambios."
+                )
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"No se pudo abrir la configuración de Firebase:\n{e}")
+    
+    def _abrir_reporte_ventas(self):
+        """Abre el diálogo de reporte de ventas."""
+        try:
+            from dialogs.reports_dialog import SalesReportDialog
+            dialog = SalesReportDialog(self.hybrid_logic or self.logic, self)
+            dialog.exec()
+        except ImportError:
+            QMessageBox.information(
+                self, 
+                "Reporte de Ventas", 
+                "El módulo de reportes está en desarrollo.\n\n"
+                "Próximamente podrá generar reportes de ventas por período."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error abriendo reporte de ventas: {e}")
+    
+    def _abrir_reporte_clientes(self):
+        """Abre el diálogo de reporte por cliente."""
+        try:
+            from dialogs.reports_dialog import ClientsReportDialog
+            dialog = ClientsReportDialog(self.hybrid_logic or self.logic, self)
+            dialog.exec()
+        except ImportError:
+            QMessageBox.information(
+                self, 
+                "Reporte por Cliente", 
+                "El módulo de reportes está en desarrollo.\n\n"
+                "Próximamente podrá generar reportes por cliente."
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Error abriendo reporte de clientes: {e}")
 
     # --------- Menu handlers ----------
     def _abrir_base_de_datos(self):

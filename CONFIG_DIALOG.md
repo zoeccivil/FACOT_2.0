@@ -10,7 +10,10 @@ El diálogo aparece automáticamente en las siguientes situaciones:
 
 1. **Primer inicio**: Si no se detectan credenciales de Firebase configuradas
 2. **Credenciales inválidas**: Si las credenciales existentes no son válidas
-3. **Manualmente**: Desde Configuración > "🔥 Configurar Firebase"
+3. **Manualmente**: Desde el menú **Herramientas → 🔥 Configurar Firebase** (Ctrl+Shift+F)
+
+> **Nota**: A partir de v2.3, el diálogo está disponible desde el menú Herramientas,
+> permitiendo cambiar las credenciales de Firebase en cualquier momento.
 
 ## Campos del Diálogo
 

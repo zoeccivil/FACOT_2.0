@@ -1,13 +1,41 @@
 # FACOT - Sistema de Gestión de Facturas y Cotizaciones
 
-![Versión](https://img.shields.io/badge/versión-2.2-blue.svg)
+![Versión](https://img.shields.io/badge/versión-2.3-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-orange.svg)
-![Tests](https://img.shields.io/badge/tests-79%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen.svg)
 
 ## 📋 Descripción
 
 FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado para empresas en República Dominicana. El sistema ofrece una solución robusta para la administración de documentos fiscales, cumpliendo con las normativas de la DGII (Dirección General de Impuestos Internos).
+
+### 🆕 Novedades v2.3 - UI Mejorada
+
+✨ **Menú Apariencias (Temas)**
+- 5 temas disponibles: Claro, Oscuro, Medianoche, Coral, Alto Contraste
+- Cambio de tema en vivo sin reiniciar
+- Persistencia automática del tema seleccionado
+- Soporte de accesibilidad (alto contraste)
+
+✨ **Configurar Firebase desde Menú**
+- Acceso directo: Herramientas → Configurar Firebase (Ctrl+Shift+F)
+- Permite cambiar credenciales sin reiniciar completamente
+- Validación de credenciales antes de guardar
+
+✨ **Reportes de Ventas y Clientes**
+- Reporte de ventas por período (agrupable por día, mes o producto)
+- Reporte por cliente con totales y última factura
+- Exportación a CSV y HTML
+- Filtros por rango de fechas
+
+✨ **Historial Solo Ingresos**
+- El historial de facturas ahora muestra solo facturas de ingreso (ventas)
+- Filtrado automático por tipo o prefijo NCF
+
+✨ **Logos en Firebase Storage**
+- Logos de plantillas se almacenan en Firebase Storage
+- Cache local automático con fallback a logo local
+- Sincronización transparente
 
 ### 🆕 Novedades v2.2 - Firestore-First
 
@@ -182,33 +210,21 @@ python demo_backend.py
 
 ## 📚 Documentación
 
-### Documentación Nueva (v2.2)
+### Documentación Principal
 
 - **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)** - Configuración completa de Firebase
 - **[NCF_SEQUENCE.md](NCF_SEQUENCE.md)** - Sistema de secuencias NCF con Firestore
 - **[BACKUPS.md](BACKUPS.md)** - Sistema de backups automáticos
 - **[CONFIG_DIALOG.md](CONFIG_DIALOG.md)** - Diálogo de configuración de Firebase
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitectura del sistema
 - **[.env.example](.env.example)** - Variables de entorno disponibles
 
-### Documentación Técnica (v2.1)
+### Guías Adicionales
 
-- **[Implementación Backend Completa](IMPLEMENTACION_BACKEND_COMPLETA.md)** - Resumen técnico completo
-- **[Guía de Integración Completa](GUIA_INTEGRACION_COMPLETA.md)** - Paso a paso para desarrolladores
-- **[Resumen de Implementación](RESUMEN_IMPLEMENTACION_FINAL.md)** - Detalles de PRs
-- **[Roadmap de Modernización](ROADMAP_MODERNIZACION.md)** - Plan de mejoras
-
-### Documentación por Fases
-
-- **[PR1: Motor de Documentos Unificado](README_PR1.md)** - Servicios base y arquitectura
-- **[PR2: Mejoras de UX](README_PR2.md)** - Tabla mejorada y atajos de teclado
-- **[PR6: Migración a Firebase](README_PR6.md)** - Arquitectura cloud y sincronización
-- **[Sistema NCF](README_SISTEMA_NCF.md)** - Comprobantes fiscales dominicanos
-- **[Indicador de Conexión](INDICADOR_CONEXION.md)** - Barra de estado visual
-
-### Guías de Solución de Problemas
-
-- **[Solución de Problemas Firebase](SOLUCION_PROBLEMAS_FIREBASE.md)**
-- **[Correcciones Firebase](RESUMEN_CORRECCIONES_FIREBASE.md)**
+- **[INSTALL.md](INSTALL.md)** - Guía de instalación detallada
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Manual de usuario
+- **[FAQ.md](FAQ.md)** - Preguntas frecuentes
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guía para contribuir
 
 ## 🏗️ Arquitectura del Sistema
 
