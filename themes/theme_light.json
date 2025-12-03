@@ -10,10 +10,18 @@
     "primary": "#2563EB",
     "primary_hover": "#1D4ED8",
     "primary_text": "#FFFFFF",
+    "accent": "#3B82F6",
     "border": "#E2E8F0",
+    "success": "#22C55E",
+    "warning": "#F59E0B",
+    "error": "#EF4444",
     "table_header_bg": "#F8FAFC",
     "table_grid": "#E2E8F0",
     "selection_bg": "#DBEAFE",
     "selection_text": "#1E40AF"
+  },
+  "metadata": {
+    "type": "light",
+    "version": "1.0"
   }
 }

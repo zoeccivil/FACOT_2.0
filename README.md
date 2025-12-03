@@ -1,6 +1,6 @@
 # FACOT - Sistema de Gestión de Facturas y Cotizaciones
 
-![Versión](https://img.shields.io/badge/versión-2.3-blue.svg)
+![Versión](https://img.shields.io/badge/versión-2.4-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.8+-green.svg)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-orange.svg)
 ![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen.svg)
@@ -9,10 +9,30 @@
 
 FACOT es un sistema completo de gestión de facturas y cotizaciones diseñado para empresas en República Dominicana. El sistema ofrece una solución robusta para la administración de documentos fiscales, cumpliendo con las normativas de la DGII (Dirección General de Impuestos Internos).
 
+### 🆕 Novedades v2.4 - Rediseño UI Completo
+
+✨ **Sistema de Temas Mejorado**
+- 7 temas disponibles:
+  - **Corporate Light** - Tema claro profesional
+  - **Dark Focus** - Tema oscuro concentrado
+  - **Modern Midnight** - Oscuro moderno con acentos azul neón
+  - **Midnight** - Variante oscura clásica
+  - **Ocean Breeze** - Tema inspirado en el océano (azul/cyan)
+  - **Sunset Coral** - Tema cálido con tonos coral/naranja
+  - **Alto Contraste** - Para accesibilidad
+- Sistema QSS + JSON centralizado
+- Cambio de tema en vivo sin reiniciar
+- Persistencia automática del tema seleccionado
+
+✨ **Columna de Acciones Mejorada**
+- Único botón "👁 Ver" legible y consistente
+- Estilo moderno con colores del tema actual
+- Mejor espaciado en tablas de historial
+
 ### 🆕 Novedades v2.3 - UI Mejorada
 
 ✨ **Menú Apariencias (Temas)**
-- 5 temas disponibles: Claro, Oscuro, Medianoche, Coral, Alto Contraste
+- Acceso rápido desde menú principal
 - Cambio de tema en vivo sin reiniciar
 - Persistencia automática del tema seleccionado
 - Soporte de accesibilidad (alto contraste)

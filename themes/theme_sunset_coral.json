@@ -1,0 +1,28 @@
+{
+  "id": "sunset-coral",
+  "name": "Sunset Coral",
+  "palette": {
+    "background": "#1A1216",
+    "surface": "#2D1F24",
+    "surface-alt": "#221419",
+    "foreground": "#FDE8E8",
+    "foreground-muted": "#FCA5A5",
+    "primary": "#F97316",
+    "primary_hover": "#FB923C",
+    "primary_text": "#FFFFFF",
+    "accent": "#FB7185",
+    "border": "#4C2E32",
+    "success": "#22C55E",
+    "warning": "#FACC15",
+    "error": "#DC2626",
+    "table_header_bg": "#221419",
+    "table_grid": "#4C2E32",
+    "selection_bg": "#C2410C",
+    "selection_text": "#FFFFFF"
+  },
+  "metadata": {
+    "type": "dark",
+    "version": "1.0",
+    "description": "Tema cálido con tonos coral y naranja inspirado en atardeceres"
+  }
+}
