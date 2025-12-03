@@ -1,0 +1,28 @@
+{
+  "id": "ocean-breeze",
+  "name": "Ocean Breeze",
+  "palette": {
+    "background": "#0A1628",
+    "surface": "#132337",
+    "surface-alt": "#0E1A2B",
+    "foreground": "#E0F2FE",
+    "foreground-muted": "#7DD3FC",
+    "primary": "#0EA5E9",
+    "primary_hover": "#38BDF8",
+    "primary_text": "#FFFFFF",
+    "accent": "#22D3EE",
+    "border": "#1E3A5F",
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "error": "#EF4444",
+    "table_header_bg": "#0E1A2B",
+    "table_grid": "#1E3A5F",
+    "selection_bg": "#0369A1",
+    "selection_text": "#FFFFFF"
+  },
+  "metadata": {
+    "type": "dark",
+    "version": "1.0",
+    "description": "Tema inspirado en el océano profundo con acentos cyan y azul"
+  }
+}
